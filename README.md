@@ -1,7 +1,7 @@
 Kelompok 6
 ====================================
 # Anggota
-> Muhammad Al Fatih (5114100)
+> Muhammad Al Fatih A.F. (5114100039)
 
 > Muhammad Akram Abdullah (5115100050)
 
