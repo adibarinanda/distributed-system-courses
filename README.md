@@ -11,7 +11,7 @@ Kelompok 6
 >
 
 # Task
-- [Tugas 1]()
-- [Tugas 2]()
-- [Tugas 3]()
-- [Final Project]()
+- [Tugas 1](https://github.com/adibarinanda/distributed-system-courses/tree/master/Tugas%201)
+- [Tugas 2](https://github.com/adibarinanda/distributed-system-courses/tree/master/Tugas%202)
+- [Tugas 3](https://github.com/adibarinanda/distributed-system-courses/tree/master/Tugas%203)
+- [Final Project](https://github.com/adibarinanda/distributed-system-courses/tree/master/Final%20Project)
