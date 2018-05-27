@@ -11,6 +11,17 @@ def get_node(namafile, status):
     namafile_encoded = namafile.encode('utf-8')
     h = hashlib.md5(namafile_encoded).hexdigest()[-1]
 
+    cek = cekkoneksi(h1)
+    if (cek):
+        return petalokasi[h1]
+
+    h2 = hashlib.md5(namafile).hexdigest()[-2]
+    cek   = cekkoneksi(h2)
+    if (cek):
+        return petalokasi[h2]
+    
+    return False
+
     if(status)
         storages = []
         if h=='a' or h=='b' or h=='c' or h=='d'
