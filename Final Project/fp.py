@@ -46,5 +46,12 @@ def storefile(namafile, isifile):
 def getfile(namafile):
     lokasi = get_node(namafile, 0)
     storage = Pyro4.Proxy(lokasi)
-    content = storage.getfile(namafile)
-    return content
+    isifile = storage.getfile(namafile)
+    return isifile
+
+def main():
+    print('nama file:')
+
+
+if __name__ == "__main__":
+    main()
