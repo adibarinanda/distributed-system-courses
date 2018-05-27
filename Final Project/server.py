@@ -11,7 +11,7 @@ class FileTransfer(object):
         
 
 if __name__ == "__main__":
-    custom_daemon = Pyro4.Daemon(host="192.168.56.101")  # some additional custom configuration
+    custom_daemon = Pyro4.Daemon(host="192.168.56.101", port=39501)  # some additional custom configuration
     # Pyro4.config.SERVERTYPE = "thread"
     Pyro4.Daemon.serveSimple(
         {
