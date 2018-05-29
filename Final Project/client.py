@@ -1,43 +1,111 @@
 import socket
+import threading
+import os
+import sys
 import Pyro4
 
-server = Pyro4.core.Proxy("PYRO:dispatcher@192.168.56.101:39501")
+host1 = "192.168.56.101"
+
+server = Pyro4.core.Proxy("PYRO:dispatcher@" + host1 + ":39501")
 
 def main():
-	print("Type file name to download:")
-	filename = raw_input()
-	# filename = "a.txt"
-	download(filename)
+	cmds = ['help', 'get', 'put', 'ls', 'quit']
+	
+	print("Command: (type 'help' to get commands list)")
+	commands = raw_input()
 
-def download(file_name):
-    s = socket.socket()
-    s.connect(('192.168.56.101', 56789))
+	command = commands.split()
+	
+	if command[0] == 'help':
+		i = 1
+		# print "\n"
+		for cmd in cmds:
+			print (str(i) + ". " + cmd)
+			i+=1
 
-    if file_name != 'q':
-    	server.download(file_name)
-        s.send(file_name)
-        data = s.recv(1024)
-        if data[:6] == 'EXISTS':
-            filesize = long(data[6:])
-            message = raw_input("File exists, " + str(filesize) +"Bytes, download? (Y/N)? -> ")
-            if message == 'Y':
-                s.send("OK")
-                f = open('new_'+file_name, 'wb')
-                data = s.recv(1024)
-                totalRecv = len(data)
-                f.write(data)
-                while totalRecv < filesize:
-                    data = s.recv(1024)
-                    totalRecv += len(data)
-                    f.write(data)
-                    print "{0:.2f}".format((totalRecv/float(filesize))*100)+ "% Done"
-                print "Download Complete!"
-                f.close()
-        else:
-            print "File Does Not Exist!"
+	elif command[0] == 'quit':
+		sys.exit()
 
-    s.close()
+	elif command[0] == 'get':
+		print("Type file name to download:")
+		filename = raw_input()
+		download(filename)
 
+	elif command[0] == 'put':
+		print("Type file name to upload:")
+		filename = raw_input()
+	# t = threading.Thread(target=upload, args=(filename, ))
+	# t.start()
+		upload(filename)
+
+	elif command[0] == 'ls':
+		if len(command)==1:
+			path = "."
+		else:
+			path = command[1]
+		listdir(path)
+
+	else:
+		print("Command " + command[0] + " not found. Please try again.")
+
+def download(filename):
+	s = socket.socket()
+	s.connect((host1, 56789))
+
+	if filename != 'q':
+		server.download(filename)
+		s.send(filename)
+		data = s.recv(1024)
+		if data[:6] == 'EXISTS':
+			filesize = long(data[6:])
+			message = raw_input("File exists, " + str(filesize) +"Bytes, download? (Y/N)? -> ")
+			if message == 'Y':
+				s.send("OK")
+				f = open('new_'+filename, 'wb')
+				# data = s.recv(1024)
+				# totalRecv = len(data)
+				# f.write(data)
+				totalRecv = 0
+				while totalRecv < filesize:
+					data = s.recv(1024)
+					totalRecv += len(data)
+					f.write(data)
+					print "{0:.2f}".format((totalRecv/float(filesize))*100)+ "% Done"
+				if totalRecv >= filesize:
+					print "Download Complete!"
+				f.close()
+		else:
+			print "File Does Not Exist!"
+
+	s.close()
+
+def upload(filename):
+	if os.path.isfile(filename):
+		s = socket.socket()
+		s.connect((host1, 56789))
+		server.upload(filename)
+		
+		s.send( "EXISTS " + str(os.path.getsize(filename)) )
+		userResponse = s.recv(1024)
+		if userResponse[:2] == 'OK':
+			with open(filename, 'rb') as f:
+				print( "Sending file " + filename + " to " + str(s.getpeername()) )
+				bytesToSend = f.read(1024)
+				s.send(bytesToSend)
+				while bytesToSend != "":
+					bytesToSend = f.read(1024)
+					s.send(bytesToSend)
+
+	else:
+		print("404")
+
+	s.close()
+
+def listdir(path):
+	a = server.listdir(path)
+	for i in a:
+		print i
 
 if __name__ == '__main__':
-	main()
+	while True:
+		main()
