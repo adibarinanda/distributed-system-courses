@@ -4,8 +4,8 @@ import Pyro4
 
 petalokasi = {}
 host = "localhost"
-host1 = "192.168.56.101"
-host2 = "192.168.56.101"
+host1 = "10.151.36.33"
+host2 = "10.151.36.51"
 host3 = "192.168.56.101"
 host4 = "192.168.56.101"
 
@@ -43,8 +43,10 @@ class Middleware(object):
 
         # namafile_encoded = namafile.encode('utf-8')
         h = hashlib.md5(namafile).hexdigest()[-1]
+        print petalokasi[h]
 
         cek = cekkoneksi(petalokasi[h])
+        print cek
         if (cek):
             return petalokasi[h]
 

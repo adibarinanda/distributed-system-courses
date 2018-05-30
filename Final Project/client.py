@@ -5,7 +5,9 @@ import os
 import sys
 import Pyro4
 
-host1 = "192.168.56.101"
+host1 = "10.151.36.33"
+host2 = "10.151.36.51"
+host3 = "192.168.56.101"
 
 middleware = Pyro4.core.Proxy("PYRO:middleware@localhost:39501")
 # server = Pyro4.core.Proxy("PYRO:dispatcher@" + host1 + ":39501")
@@ -47,11 +49,23 @@ def main():
 
 	elif command[0] == 'ls':
 		a = "PYRO:dispatcher@" + host1 + ":39501"
+		b = "PYRO:dispatcher@" + host2 + ":39501"
+		c = "PYRO:dispatcher@" + host3 + ":39501"
 		if len(command)==1:
 			path = "."
+			conn = a
+		elif len(command)==3:
+			path = command[1]
+			if command[2]=='1':
+				conn = a
+			elif command[2]=='2':
+				conn = b
+			elif command[2]=='3':
+				conn = c
 		else:
 			path = command[1]
-		listdir(path, a)
+			conn = a
+		listdir(path, conn)
 
 	else:
 		print("Command " + command[0] + " not found. Please try again.")
@@ -59,7 +73,10 @@ def main():
 def download(filename, conn):
 	server = Pyro4.core.Proxy(conn)
 	s = socket.socket()
-	s.connect((host1, 56789))
+
+	hosts = str(conn.split(':')[1].split('@')[1])
+
+	s.connect((hosts, 56789))
 
 	if filename != 'q':
 		server.download(filename)
@@ -92,7 +109,10 @@ def upload(filename, conn):
 	server = Pyro4.core.Proxy(conn)
 	if os.path.isfile(filename):
 		s = socket.socket()
-		s.connect((host1, 56789))
+		
+		hosts = str(conn.split(':')[1].split('@')[1])
+
+		s.connect((hosts, 56789))
 		server.upload(filename)
 		
 		s.send( "EXISTS " + str(os.path.getsize(filename)) )
