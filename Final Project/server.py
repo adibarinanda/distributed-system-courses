@@ -3,12 +3,14 @@ import threading
 import os
 import time
 import Pyro4
+from shutil import copyfile
 
-host1 = "192.168.56.101"
-host2 = "192.168.56.102"
+host1 = "10.151.36.33"
+host2 = "10.151.36.51"
+host3 = "192.168.56.101"
 
 s = socket.socket()
-s.bind((host1,56789))
+s.bind((host2,56789))
 s.listen(10)
 
 def SendFile(name, sock):
@@ -70,14 +72,23 @@ class FileTransfer(object):
 	def listdir(self, dir_path):
 		return os.listdir(dir_path)
 
-    def rename(self, s_path, d_path):
-        os.rename(s_path, d_path)
+	def makedir(self, dir_path):
+		os.mkdir(dir_path)
 
-    def delete(self,filename):
-    	os.delete(filename)
+	def chdir(self, dir_path):
+		os.chdir(dir_path)
+
+	def rename(self, s_path, d_path):
+		os.rename(s_path, d_path)
+
+	def delete(self,filename):
+		os.remove(filename)
+
+	def copy(self, file1, file2):
+		copyfile(file1, file2)
 
 if __name__ == "__main__":
-	custom_daemon = Pyro4.Daemon(host=host1, port=39501)  # some additional custom configuration
+	custom_daemon = Pyro4.Daemon(host=host2, port=39501)  # some additional custom configuration
 
 	# Pyro4.config.SERVERTYPE = "thread"
 	Pyro4.Daemon.serveSimple(
