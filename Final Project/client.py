@@ -1,16 +1,21 @@
 import socket
 import threading
+import hashlib
 import os
 import sys
 import Pyro4
 
 host1 = "192.168.56.101"
 
-server = Pyro4.core.Proxy("PYRO:dispatcher@" + host1 + ":39501")
+middleware = Pyro4.core.Proxy("PYRO:middleware@localhost:39501")
+# server = Pyro4.core.Proxy("PYRO:dispatcher@" + host1 + ":39501")
 
 def main():
 	cmds = ['help', 'get', 'put', 'ls', 'quit']
-	
+	# print server
+	# print middleware.get_node("a.txt")
+	# a=middleware.get_node('a.txt')
+	# print a
 	print("Command: (type 'help' to get commands list)")
 	commands = raw_input()
 
@@ -29,26 +34,30 @@ def main():
 	elif command[0] == 'get':
 		print("Type file name to download:")
 		filename = raw_input()
-		download(filename)
+		a = middleware.get_node(filename)
+		download(filename, a)
 
 	elif command[0] == 'put':
 		print("Type file name to upload:")
 		filename = raw_input()
 	# t = threading.Thread(target=upload, args=(filename, ))
 	# t.start()
-		upload(filename)
+		a = middleware.get_node(filename)
+		upload(filename, a)
 
 	elif command[0] == 'ls':
+		a = "PYRO:dispatcher@" + host1 + ":39501"
 		if len(command)==1:
 			path = "."
 		else:
 			path = command[1]
-		listdir(path)
+		listdir(path, a)
 
 	else:
 		print("Command " + command[0] + " not found. Please try again.")
 
-def download(filename):
+def download(filename, conn):
+	server = Pyro4.core.Proxy(conn)
 	s = socket.socket()
 	s.connect((host1, 56789))
 
@@ -79,7 +88,8 @@ def download(filename):
 
 	s.close()
 
-def upload(filename):
+def upload(filename, conn):
+	server = Pyro4.core.Proxy(conn)
 	if os.path.isfile(filename):
 		s = socket.socket()
 		s.connect((host1, 56789))
@@ -101,7 +111,8 @@ def upload(filename):
 
 	s.close()
 
-def listdir(path):
+def listdir(path, conn):
+	server = Pyro4.core.Proxy(conn)
 	a = server.listdir(path)
 	for i in a:
 		print i
