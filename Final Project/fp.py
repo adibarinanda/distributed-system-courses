@@ -30,6 +30,9 @@ class Middleware(object):
         for x in range(6, 10):
             petalokasi[str(x)] = 'PYRO:dispatcher@' + host4 + ':39501'
 
+        # for k, v in petalokasi.items():
+        #     print v
+
     def get_node(self, namafile):
     # def a():
         # petalokasi = {}
@@ -46,9 +49,20 @@ class Middleware(object):
         print petalokasi[h]
 
         cek = cekkoneksi(petalokasi[h])
-        print cek
-        if (cek):
+        if(cek):
             return petalokasi[h]
+        else:
+            for k, v in petalokasi.items():
+                # print v
+                cek = cekkoneksi(v)
+                # print cek
+                # print i
+                if (cek):
+                    # print i
+                    return v
+
+        return False
+
 
         # h2 = hashlib.md5(namafile).hexdigest()[-2]
         # cek   = cekkoneksi(h2)

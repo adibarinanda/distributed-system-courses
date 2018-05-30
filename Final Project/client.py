@@ -13,7 +13,7 @@ middleware = Pyro4.core.Proxy("PYRO:middleware@localhost:39501")
 # server = Pyro4.core.Proxy("PYRO:dispatcher@" + host1 + ":39501")
 
 def main():
-	cmds = ['help', 'get', 'put', 'rename', 'ls', 'rm', 'quit']
+	cmds = ['help', 'get', 'put', 'rename', 'cp', 'ls', 'rm', 'quit']
 	# print server
 	# print middleware.get_node("a.txt")
 	# a=middleware.get_node('a.txt')
@@ -36,16 +36,31 @@ def main():
 	elif command[0] == 'get':
 		print("Type file name to download:")
 		filename = raw_input()
-		a = middleware.get_node(filename)
-		download(filename, a)
+		if len(filename)==1:
+			download(filename, a)
+		else:
+			files = filename.split()
+			for f in files:
+				a = middleware.get_node(f)
+				# if f == 'get':
+				# 	continue
+				download(f, a)
 
 	elif command[0] == 'put':
 		print("Type file name to upload:")
 		filename = raw_input()
 	# t = threading.Thread(target=upload, args=(filename, ))
 	# t.start()
-		a = middleware.get_node(filename)
-		upload(filename, a)
+		if len(filename)==1:
+			upload(filename, a)
+		else:
+			files = filename.split()
+			print files
+			for f in files:
+				a = middleware.get_node(f)
+				# if f == 'put':
+				# 	continue
+				upload(f, a)
 
 	elif command[0] == 'rename':
 		print("Type file name to rename:")
@@ -57,11 +72,21 @@ def main():
 		a = middleware.get_node(filename)
 		rename(filename, filename2, a)
 
-	elif command[0] == 'delete':
-		print("Type file name to rename:")
+	elif command[0] == 'cp':
+		print("Type file name to copy:")
+		filename = raw_input()
+		print("Type NEW file name:")
+		filename2 = raw_input()
+	# t = threading.Thread(target=upload, args=(filename, ))
+	# t.start()
+		a = middleware.get_node(filename)
+		copy(filename, filename2, a)
+
+	elif command[0] == 'rm':
+		print("Type file name to delete:")
 		filename = raw_input()
 		a = middleware.get_node(filename)
-		upload(filename, a)
+		delete(filename, a)
 
 	elif command[0] == 'ls':
 		a = "PYRO:dispatcher@" + host1 + ":39501"
@@ -82,6 +107,45 @@ def main():
 			path = command[1]
 			conn = a
 		listdir(path, conn)
+
+	elif command[0] == 'mkdir':
+		a = "PYRO:dispatcher@" + host1 + ":39501"
+		b = "PYRO:dispatcher@" + host2 + ":39501"
+		c = "PYRO:dispatcher@" + host3 + ":39501"
+		if len(command)==1:
+			print "Parameter is not complete"
+		elif len(command)==3:
+			path = command[1]
+			if command[2]=='1':
+				conn = a
+			elif command[2]=='2':
+				conn = b
+			elif command[2]=='3':
+				conn = c
+		# else:
+		# 	path = command[1]
+		# 	conn = a
+		makedir(path, conn)
+
+	elif command[0] == 'chdir':
+		a = "PYRO:dispatcher@" + host1 + ":39501"
+		b = "PYRO:dispatcher@" + host2 + ":39501"
+		c = "PYRO:dispatcher@" + host3 + ":39501"
+		path = "."
+		if len(command)==1:
+			print "Parameter is not complete"
+		elif len(command)==3:
+			path = command[1]
+			if command[2]=='1':
+				conn = a
+			elif command[2]=='2':
+				conn = b
+			elif command[2]=='3':
+				conn = c
+		else:
+			path = command[1]
+			conn = a
+		chdir(path, conn)
 
 	else:
 		print("Command " + command[0] + " not found. Please try again.")
@@ -155,19 +219,34 @@ def rename(file_from, file_to, conn):
 	else:
 		print('rename failed')
 
+def copy(file_from, file_to, conn):
+	server = Pyro4.core.Proxy(conn)
+	response = server.copy(file_from, file_to)
+	if(response == True):
+		print(file_from + ' copied to ' + file_to)
+	else:
+		print('copy failed')
+
 def delete(filename, conn):
 	server = Pyro4.core.Proxy(conn)
 	response = server.delete(filename)
-	if(response):
-		print(filename + 'deleted')
-	else:
-		print('delete failed')
+	print filename + " deleted."
 
 def listdir(path, conn):
 	server = Pyro4.core.Proxy(conn)
 	a = server.listdir(path)
 	for i in a:
 		print i
+
+def makedir(path, conn):
+	server = Pyro4.core.Proxy(conn)
+	a = server.makedir(path)
+
+def chdir(path, conn):
+	server = Pyro4.core.Proxy(conn)
+	a = server.chdir(path)
+	# for i in a:
+		# print i
 
 if __name__ == '__main__':
 	while True:
