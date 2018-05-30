@@ -13,7 +13,7 @@ middleware = Pyro4.core.Proxy("PYRO:middleware@localhost:39501")
 # server = Pyro4.core.Proxy("PYRO:dispatcher@" + host1 + ":39501")
 
 def main():
-	cmds = ['help', 'get', 'put', 'ls', 'quit']
+	cmds = ['help', 'get', 'put', 'rename', 'ls', 'quit']
 	# print server
 	# print middleware.get_node("a.txt")
 	# a=middleware.get_node('a.txt')
@@ -46,6 +46,16 @@ def main():
 	# t.start()
 		a = middleware.get_node(filename)
 		upload(filename, a)
+
+	elif command[0] == 'rename':
+		print("Type file name to rename:")
+		filename = raw_input()
+		print("Type NEW file name:")
+		filename2 = raw_input()
+	# t = threading.Thread(target=upload, args=(filename, ))
+	# t.start()
+		a = middleware.get_node(filename)
+		rename(filename, filename2, a)
 
 	elif command[0] == 'ls':
 		a = "PYRO:dispatcher@" + host1 + ":39501"
@@ -130,6 +140,14 @@ def upload(filename, conn):
 		print("404")
 
 	s.close()
+
+def rename(file_from, file_to, conn):
+	server = Pyro4.core.Proxy(conn)
+	response = server.rename(file_from, file_to)
+	if(response == True):
+		print(file_from + ' renamed to ' + file_to)
+	else:
+		print('rename failed')
 
 def listdir(path, conn):
 	server = Pyro4.core.Proxy(conn)

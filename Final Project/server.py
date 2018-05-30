@@ -70,6 +70,9 @@ class FileTransfer(object):
 	def listdir(self, dir_path):
 		return os.listdir(dir_path)
 
+    def rename(self, s_path, d_path):
+        os.rename(s_path, d_path)
+
 if __name__ == "__main__":
 	custom_daemon = Pyro4.Daemon(host=host1, port=39501)  # some additional custom configuration
 
